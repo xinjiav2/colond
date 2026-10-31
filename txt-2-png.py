@@ -1,5 +1,5 @@
 import argparse
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 
 delimiter = "#" 
 # seperate the bitsd in output
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     dec = argparse.ArgumentParser(description="decode text from image")
     dec.add_argument("image", help="Path to the input image")
     dec.add_argument("text", help="path to text file to hide")
-    dec.add_argument("--output", "-o", help="path to output decoded text", default=None)    
+    dec.add_argument("output", help="path to output decoded text")    
 
     args = parser.parse_args()
 
