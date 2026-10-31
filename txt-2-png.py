@@ -61,7 +61,6 @@ def decode(image_path: str, text: str, output_path: str) -> None:
     for r, g, b in pixels:
         for val in (r, g, b):
             extracted_bits.append(str(val & 1))
-
             if (
                 len(extracted_bits) >= delimiter_lenght
                 and "".join(extracted_bits[-delimiter_lenght:]) == delimiter_bits
@@ -76,9 +75,8 @@ def decode(image_path: str, text: str, output_path: str) -> None:
 
                 return content
 
-        print("No hidden text found in the image.")
-        return ""
-    
+    print("No hidden text found in the image.")
+    return ""
 
 
 
@@ -101,6 +99,7 @@ if __name__ == "__main__":
 
     if args.command == "encode":
         encode(args.image, args.text, args.output)
+
     elif args.command == "decode":
         result = decode(args.image, args.output)
         if not args.output and result:
