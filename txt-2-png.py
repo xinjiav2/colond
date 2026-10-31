@@ -1,4 +1,6 @@
 import argparse
+from pathlib import Path
+
 from PIL import Image
 
 delimiter = "#" 
@@ -6,21 +8,23 @@ delimiter = "#"
 
 def text_to_bits(text: str) -> str:
     """Convert text to a string of bits."""
-    encode = text + delimiter
-    return ''.join(format(ord(char), '08b') for char in encode)
+    encoded = text + delimiter
+    return "".join(format(ord(char), "08b") for char in encoded)
+
 
 def bits_to_text(bits: str) -> str:
     """convert string back to bits"""
     byte_array = bytearray()
     for i in range(0, len(bits), 8):
-        byte = bits[i:i+8]
+        byte = bits[i : i + 8]
+        if len(byte) < 8:
+            break
         byte_array.append(int(byte, 2))
-    return byte_array.decode('utf-8', errors='ignore')
+    return byte_array.decode("utf-8", errors="ignore")
 
-def encode(image_path: str, text: str, output_path: str) -> None:
-    with open(text, "r", encoding = "utf-8") as file:
-        secret_text = file.read()
 
+def encode(image_path: str, text_file: str, output_path: str) -> None:
+    secret_text = Path(text_file).read_text(encoding="utf-8")
     bits = text_to_bits(secret_text)
     total_bits = len(bits)
 
@@ -47,30 +51,28 @@ def encode(image_path: str, text: str, output_path: str) -> None:
     encoded_img.save(output_path, "PNG")
     print(f"Text encoded and saved to {output_path}")
 
-def decode(image_path: str, text: str, output_path: str) -> None:
-    """read hidden text from a .png"""
+
+def decode(image_path: str, output_path: str | None = None) -> str:
+    """read hidden text from a png"""
     img = Image.open(image_path).convert("RGB")
     pixels = list(img.getdata())
 
-    extracted_bits = []
-    delimiter_bits = "".join(
-        f"{byte:08b}" for byte in delimiter.encode("utf-8")
-    )
-    delimiter_lenght = len(delimiter_bits)
+    extracted_bits: list[str] = []
+    delimiter_bits = "".join(f"{byte:08b}" for byte in delimiter.encode("utf-8"))
+    delimiter_length = len(delimiter_bits)
 
     for r, g, b in pixels:
         for val in (r, g, b):
             extracted_bits.append(str(val & 1))
             if (
-                len(extracted_bits) >= delimiter_lenght
-                and "".join(extracted_bits[-delimiter_lenght:]) == delimiter_bits
+                len(extracted_bits) >= delimiter_length
+                and "".join(extracted_bits[-delimiter_length:]) == delimiter_bits
             ):
-                content_bits = "".join(extracted_bits[:-delimiter_lenght])
+                content_bits = "".join(extracted_bits[:-delimiter_length])
                 content = bits_to_text(content_bits)
 
                 if output_path:
-                    with open(output_path, "w", encoding="utf-8") as f:
-                        f.write(content)
+                    Path(output_path).write_text(content, encoding="utf-8")
                     print(f"Hidden text extracted and saved to {output_path}")
 
                 return content
@@ -79,29 +81,25 @@ def decode(image_path: str, text: str, output_path: str) -> None:
     return ""
 
 
-
 # cli
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="setenography tool to hide/extract text from/in image")
+    parser = argparse.ArgumentParser(description="Steganography tool to hide/extract text from/in an image")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    enc = argparse.ArgumentParser(description="encode text from file to image")
-    enc.add_argument("image", help="Path to the input image")
-    enc.add_argument("text", help="path to text file to hide")
-    enc.add_argument("output", help="path to output encoded image")
+    encode_parser = subparsers.add_parser("encode", description="Encode text from a file into an image")
+    encode_parser.add_argument("image", help="Path to the input image")
+    encode_parser.add_argument("text", help="Path to the text file to hide")
+    encode_parser.add_argument("output", help="Path to the output encoded image")
+    encode_parser.set_defaults(func=lambda args: encode(args.image, args.text, args.output))
 
-    dec = argparse.ArgumentParser(description="decode text from image")
-    dec.add_argument("image", help="Path to the input image")
-    dec.add_argument("text", help="path to text file to hide")
-    dec.add_argument("output", help="path to output decoded text")    
+    decode_parser = subparsers.add_parser("decode", description="Decode text from an image")
+    decode_parser.add_argument("image", help="Path to the input image")
+    decode_parser.add_argument("--output", "-o", help="Path to output decoded text", default=None)
+    decode_parser.set_defaults(func=lambda args: decode(args.image, args.output))
 
     args = parser.parse_args()
+    result = args.func(args)
 
-    if args.command == "encode":
-        encode(args.image, args.text, args.output)
-
-    elif args.command == "decode":
-        result = decode(args.image, args.output)
-        if not args.output and result:
-            print("Hidden text:", result)
+    if args.command == "decode" and not args.output and result:
+        print("Hidden text:", result)
 
