@@ -47,6 +47,41 @@ def encode(image_path: str, text: str, output_path: str) -> None:
     encoded_img.save(output_path, "PNG")
     print(f"Text encoded and saved to {output_path}")
 
+def decode(image_path: str, text: str, output_path: str) -> None:
+    """read hidden text from a .png"""
+    img = Image.open(image_path).convert("RGB")
+    pixels = list(img.getdata())
+
+    extracted_bits = []
+    delimiter_bits = "".join(
+        f"{byte:08b}" for byte in delimiter.encode("utf-8")
+    )
+    delimiter_lenght = len(delimiter_bits)
+
+    for r, g, b in pixels:
+        for val in (r, g, b):
+            extracted_bits.append(str(val & 1))
+
+            if (
+                len(extracted_bits) >= delimiter_lenght
+                and "".join(extracted_bits[-delimiter_lenght:]) == delimiter_bits
+            ):
+                content_bits = "".join(extracted_bits[:-delimiter_lenght])
+                content = bits_to_text(content_bits)
+
+                if output_path:
+                    with open(output_path, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    print(f"Hidden text extracted and saved to {output_path}")
+
+                return content
+
+        print("No hidden text found in the image.")
+        return ""
+    
+
+
+
 # cli
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="encode text from file to image")
