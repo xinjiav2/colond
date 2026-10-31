@@ -84,11 +84,19 @@ def decode(image_path: str, text: str, output_path: str) -> None:
 
 # cli
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="encode text from file to image")
-    parser.add_argument("image", help="Path to the input image")
-    parser.add_argument("text", help="path to text file to hide")
-    parser.add_argument("output", help="path to output encoded image")
+    encode = argparse.ArgumentParser(description="encode text from file to image")
+    encode.add_argument("image", help="Path to the input image")
+    encode.add_argument("text", help="path to text file to hide")
+    encode.add_argument("output", help="path to output encoded image")
 
-    args = parser.parse_args()
+    decode = argparse.ArgumentParser(description="decode text from image")
+    decode.add_argument("image", help="Path to the input image")
+    decode.add_argument("text", help="path to text file to hide")
+    decode.add_argument("output", help="path to output decoded text")    
+
+    args = encode.parse_args()
     encode(args.image, args.text, args.output)
+
+    args = decode.parse_args()
+    decode(args.image, args.text, args.output)
 
