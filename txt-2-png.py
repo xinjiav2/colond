@@ -1,7 +1,7 @@
 import argparse
 from PIL import Image, ImageDraw, ImageFont
 
-delimiter = " " 
+delimiter = "#" 
 # seperate the bitsd in output
 
 def text_to_bits(text: str) -> str:
@@ -85,15 +85,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="setenography tool to hide/extract text from/in image")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    encode = argparse.ArgumentParser(description="encode text from file to image")
-    encode.add_argument("image", help="Path to the input image")
-    encode.add_argument("text", help="path to text file to hide")
-    encode.add_argument("output", help="path to output encoded image")
+    enc = argparse.ArgumentParser(description="encode text from file to image")
+    enc.add_argument("image", help="Path to the input image")
+    enc.add_argument("text", help="path to text file to hide")
+    enc.add_argument("output", help="path to output encoded image")
 
-    decode = argparse.ArgumentParser(description="decode text from image")
-    decode.add_argument("decode", help="Path to the input image")
-    decode.add_argument("image", help="path to text file to hide")
-    decode.add_argument("--output", "-o", help="path to output decoded text", default=None)    
+    dec = argparse.ArgumentParser(description="decode text from image")
+    dec.add_argument("image", help="Path to the input image")
+    dec.add_argument("text", help="path to text file to hide")
+    dec.add_argument("--output", "-o", help="path to output decoded text", default=None)    
 
     args = parser.parse_args()
 
