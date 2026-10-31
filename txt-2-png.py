@@ -47,4 +47,12 @@ def encode(image_path: str, text: str, output_path: str) -> None:
     encoded_img.save(output_path, "PNG")
     print(f"Text encoded and saved to {output_path}")
 
-    
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="encode text from file to image")
+    parser.add_argument("image", help="Path to the input image")
+    parser.add_argument("text", help="path to text file to hide")
+    parser.add_argument("output", help="path to output encoded image")
+
+    args = parser.parse_args()
+    encode(args.image, args.text, args.output)
+
